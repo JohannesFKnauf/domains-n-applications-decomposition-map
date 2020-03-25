@@ -1,0 +1,42 @@
+/* page styling */
+
+label, textarea {
+    display: block;
+    clear: left;
+}
+
+/* common styling */
+
+svg {
+    font: 14px sans-serif;
+}
+
+/* dendrogram styling */
+
+.node text {
+    font: 14px sans-serif;
+}
+
+.node--leaf circle {
+    fill: #686;
+}
+
+.node--leaf text {
+    fill: #686;
+    text-anchor: start;
+}
+
+.node--internal circle {
+    fill: #373;
+}
+
+.node--internal text {
+    text-shadow: 0 2px 0 #fff, 0 -2px 0 #fff, 2px 0 0 #fff, -2px 0 0 #fff;
+    text-anchor: end;
+}
+
+.diagonal {
+    fill: none;
+    stroke: #8b8;
+    stroke-width: 2px;
+}

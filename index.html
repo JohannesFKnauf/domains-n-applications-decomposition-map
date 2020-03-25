@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DnA Decomposition Map Visualisation</title>
+    <link href="dna-map.css" rel="stylesheet" type="text/css"></link>
+  </head>
+  <body>
+    <h1>DnA Decomposition Map</h1>
+
+    <p>Welcome to this little prototype of the DnA Decomposition Map App! This app runs completely client-side in your browser. It does not send any of your data to any server.</p>
+
+    <p>The example data below is completely fictional. Any similarity to how <a href="https://metamorphant.de">metamorphant</a> works is purely coincidental.</p>
+
+    <p>Have fun!</p>
+
+    <h2>How to use it</h2>
+    <p>The app expects your domains'n'applications decomposition draft as input in <a href="#domains">the text field below</a>.</p>
+
+    <p>For your convenience, you can also <a href="#domainfile">load a file from your local PC</a> into the text field.</p>
+
+    <p>Make sure to save your results after editing!</p>
+
+    <form id="chart">
+      <h2>Choose diagram style</h2>
+      <label><input type="radio" name="mode" value="cluster" checked> Dendrogram</label>
+      <label><input type="radio" name="mode" value="treemap"> Treemap</label>
+      <label><input type="radio" name="mode" value="partition"> Partition</label>
+    </form>
+    <div id="dnavis"></div>
+    <form id="data">
+      
+      <label for="domains">Enter domains and solutions:
+      </label> 
+      <textarea id="domains" name="domains" rows="20" cols="100"></textarea>
+      <button id="refresh" type="button">Refresh diagram</button>
+      <label for="domainfile">Load local file into text field:
+        <input id="domainfile" name="domainfile" size="20" type="file"></input>
+      </label>
+    </form>
+
+    
+    <script src="d3.v5.15.0.min.js"></script>
+    <script>      
+      function colorLeaves(root) {
+          const color = d3.scaleOrdinal(d3.quantize(d3.interpolateCool, leafCount));
+          let i = 0;
+          root.eachAfter(node => {
+              if (node.children) {
+                  node.data.color = node.children[0].data.color;
+              } else {
+                  node.data.color = color(i);
+                  i++;
+              }
+          });
+      }
+
+      function renderPartition(root) {
+          root.sum(d => d.value);
+          leafCount = root.leaves().length;
+
+          colorLeaves(root);
+          
+          const width = 1000;
+          const height = 20 * leafCount;
+          
+          const partition = d3.partition()
+                .size([height, width]);
+
+          partition(root);
+
+          const dnavis = d3.select("#dnavis");
+
+          dnavis
+              .selectAll("*")
+              .remove();
+          
+          const svg = dnavis
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+          
+          const g = svg
+                .append("g")
+                .attr("transform", "translate(40,0)");
+
+          const box = g
+                .selectAll("g")
+                .data(root.descendants())
+                .join("g")
+                .attr("transform", d => "translate(" + [d.y0, d.x0] + ")")
+
+          const rect = box
+                .append("rect")
+                .attr("stroke", "#fff")
+                .attr("fill-opacity", 0.5)
+                .attr("fill", d => d.data.color)
+                .attr("width", d => d.y1 - d.y0)
+                .attr("height", d => d.x1 - d.x0);
+
+          const text = box.append("text")
+                .attr("x", 4)
+                .attr("y", 14)
+                .attr("fill-opacity", d => 1.0)
+                .text(d => d.data.key);
+      }
+
+      function renderTreemap(root) {
+          root.sum(d => d.value);
+          leafCount = root.leaves().length;
+
+          colorLeaves(root);
+          
+          const width = 1800;
+          const height = 800;
+          
+          const treemap = d3.treemap()
+                .size([width, height])
+                .paddingOuter(20);
+
+          treemap(root);
+
+          const dnavis = d3.select("#dnavis");
+
+          dnavis
+              .selectAll("*")
+              .remove();
+          
+          const svg = dnavis
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+          
+          const g = svg
+                .append("g")
+                .attr("transform", "translate(0,0)");
+
+          const box = g
+                .selectAll("g")
+                .data(root.descendants())
+                .enter()
+                .append("g")
+                .attr("transform", d => "translate(" + [d.x0, d.y0] + ")")
+
+          const rect = box
+                .append("rect")
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0)
+                .attr("fill-opacity", 0.5)
+                .attr("fill", d => d.data.color)
+                .attr("stroke", d => d.data.color);
+
+          const text = box.append("text")
+                .attr("x", 4)
+                .attr("y", 14)
+                .attr("fill-opacity", d => 1.0)
+                .text(d => d.data.key);          
+      }
+
+      function renderDendrogram(root) {
+          leafCount = root.leaves().length;
+          
+          const width = 1000;
+          const height = 16 * leafCount + 200;
+          
+          const cluster = d3.cluster()
+                .size([height - 100, width - 200]);
+
+          cluster(root);
+
+          const dnavis = d3.select("#dnavis");
+
+          dnavis
+              .selectAll("*")
+              .remove();
+          
+          const svg = dnavis
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+          
+          const g = svg
+                .append("g")
+                .attr("transform", "translate(40,0)");
+
+          function diagonal(d) {
+              return d3.linkHorizontal()({source: [d.parent.y, d.parent.x],
+                                          target: [d.y, d.x]});
+          }
+
+          var link = g.selectAll(".diagonal")
+              .data(root.descendants().slice(1))
+              .enter().append("path")
+              .attr("class", "diagonal")
+              .attr("d", diagonal);
+
+          var node = g.selectAll(".node")
+              .data(root.descendants())
+              .enter().append("g")
+              .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+              .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+
+          node.append("circle")
+              .attr("r", 4);
+
+          node.append("text")
+              .attr("dy", 3)
+              .attr("x", d => d.children ? -8 : 8)
+              .text(d => d.data.key);
+      }
+
+      function renderChart() {
+          // input is expected in the form country.company.domain.solution
+          var solutions = d3.dsvFormat(".")
+              .parseRows(d3.select("#data #domains")
+                         .node().value, (d, i) => ({
+                             country: d[0],
+                             company: d[1],
+                             domain: d[2],
+                             solution: d[3]
+                         }));
+
+          const nesting = d3.nest()
+                .key(d => d.country)
+                .key(d => d.company)
+                .key(d => d.domain)
+                .key(d => d.solution)
+                .rollup(d => 1)
+                .entries(solutions)[0];
+          const root = d3.hierarchy(nesting, d => d.values);
+
+          const mode = d3.select("input[name=mode]:checked")
+                .attr("value");
+          switch (mode) {
+          case "cluster":
+              renderDendrogram(root);
+              break;
+          case "treemap":
+              renderTreemap(root);
+              break;
+          case "partition":
+              renderPartition(root);
+              break;
+          }          
+      }
+
+      addEventListener("load", function() {
+          d3.text("example.dsv")
+              .then(text => {
+                  d3.select("#data #domains").node().value = text;
+                  renderChart();
+              });
+      });
+
+      d3.selectAll("#chart input")
+    .on("change", renderChart);
+
+      d3.select("#data #refresh")
+    .on("click", renderChart);
+
+      function loadFile() {
+          const input = this;
+          const file = input.files[0];
+
+          file.text().then(text => {
+              d3.select("#data #domains").node().value =  text;
+              renderChart();
+              this.value = ""; // reset file input
+          });
+      }
+      
+      d3.select("#data #domainfile")
+    .on("change", loadFile);
+    </script>
+  </body>
+</html>
