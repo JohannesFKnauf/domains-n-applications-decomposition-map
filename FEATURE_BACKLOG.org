@@ -1,0 +1,32 @@
+* Arbitrary nesting of subdomains
+** currently we are limited to a single domain level
+* Arbitrary nesting of subapplications 
+** currently an application is just described by its name
+** subapplication = application feature?
+** precursor for feature analysis?
+* Extended data on elements (domains, applications)
+** Associated DevOps-Team
+** Freeform notes
+** Supported Features?
+** Base-Color?
+** Favorite position / affinity?
+* Visualize Teams / Organisational responsibility
+** Color?
+** Team-Logo-Bubble?
+* Improved Interactivity
+** Zoom-In
+** Zoom-Out
+** Refinement on Mouseover
+** Breadcrumb Navigation
+* Improved layout
+** Slice on high level, dice on subdomains
+* Strict model
+** counter-productive? maybe the ambiguity is really helpful?
+** Elements
+*** Domain
+**** Subdomain
+*** Application
+*** Feature
+*** Organisation
+**** Branch
+**** Team
