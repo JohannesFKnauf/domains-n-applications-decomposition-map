@@ -18,6 +18,7 @@
 ** Zoom-Out
 ** Refinement on Mouseover
 ** Breadcrumb Navigation
+** Drag-and-Drop Editing
 * Improved layout
 ** Slice on high level, dice on subdomains
 * Strict model
