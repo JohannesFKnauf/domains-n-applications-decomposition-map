@@ -35,3 +35,8 @@
 ** constraints?
 ** penalties?
 ** example: rough layering into infrastructural base domains, supporting business domains, customer-facing business domains
+* User accounts and persistence
+** Save your model
+** Mail update notifications to others
+* Search based highlight
+** a.k.a. Search on Map
