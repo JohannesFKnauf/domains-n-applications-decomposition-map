@@ -5,43 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DnA Decomposition Map Visualisation</title>
     <link href="dna-map.css" rel="stylesheet" type="text/css"></link>
+    <link href="bulma-0.8.0.min.css" rel="stylesheet" type="text/css"></link>
+    <script src="d3.v5.15.0.min.js"></script>
   </head>
   <body>
-    <h1>DnA Decomposition Map</h1>
+    <section class="section">
+      <div class="bd-main-container container-fluid">
+        <div class="bd-duo">
+          <div class="bd-lead">
+            <h1 class="title">
+              DnA Decomposition Map
+            </h1>
+            <p class="subtitle">
+              Create a landscape of your Domains 'n' Applications (DnA)!
+            </p>
 
-    <p>Welcome to this little prototype of the DnA Decomposition Map App! This app runs completely client-side in your browser. It does not send any of your data to any server.</p>
+            <nav style="margin-bottom: 1rem;">
+              <div class="tabs">
+                <ul>
+                  <li id="treemap-tab" class="is-active"><a href="#treemap">Treemap</a></li>
+                  <li id="dendrogram-tab"><a href="#dendrogram">Dendrogram</a></li>
+                  <li id="partition-tab"><a href="#partition">Partition</a></li>
+                  <li id="data-editor-tab"><a href="#data-editor">Data Editor</a></li>
+                  <li id="help-tab"><a href="#help">Help</a></li>
+                </ul>
+              </div>
+            </nav>
 
-    <p>The example data below is completely fictional. Any similarity to how <a href="https://metamorphant.de">metamorphant</a> works is purely coincidental.</p>
+            <div>
+              <div id="dnavis" class="pane"></div>
+              <div id="data-editor" class="pane" style="display: none;">
+                <div class="column is-two-thirds">
+                  <form id="data">
+                    
+                    <label for="domains">Enter domains and solutions:
+                    </label> 
+                    <textarea class="textarea" placeholder="country.company.domain.application" id="domains" name="domains" rows="20" cols="100"></textarea>
+                    <label for="domainfile" class="file-label">
+                      <input class="file-input" id="domainfile" name="domainfile" size="20" type="file">
+                      <span class="file-cta">
+                        <span class="file-icon">
+                          <svg class="svg-inline--fa fa-upload fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="upload" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M296 384h-80c-13.3 0-24-10.7-24-24V192h-87.7c-17.8 0-26.7-21.5-14.1-34.1L242.3 5.7c7.5-7.5 19.8-7.5 27.3 0l152.2 152.2c12.6 12.6 3.7 34.1-14.1 34.1H320v168c0 13.3-10.7 24-24 24zm216-8v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h136v8c0 30.9 25.1 56 56 56h80c30.9 0 56-25.1 56-56v-8h136c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg>
+                        </span>
+                        <span class="file-label">
+                          Load a file…
+                        </span>
+                      </span>
+</input>
+                    </label>
+                  </form>
+                </div>
+              </div>
+              <div id="help" class="pane" style="display: none;">
+                <div class="column is-two-thirds">
+                  <div class="content is-medium">
+                    <h3>DnA Decomposition Map</h3>
+                    
+                    <p>Welcome to this little prototype of the DnA Decomposition Map App! This app runs completely client-side in your browser. It does not send any of your data to any server.</p>
+                    
+                    <p>The example data below is completely fictional. Any similarity to how <a href="https://metamorphant.de">metamorphant</a> works is purely coincidental.</p>
+                    
+                    <p>Have fun!</p>
+                    
+                    <h3>How to use it</h3>
+                    <p>The app expects your domains'n'applications decomposition draft as input in <a href="#data-editor">the data editor</a>.</p>
+                    
+                    <p>For your convenience, you can also <a href="#data-editor">load a file from your local PC into the data editor.</a></p>
+                    
+                    <p>Make sure to save your results after editing!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <p>Have fun!</p>
-
-    <h2>How to use it</h2>
-    <p>The app expects your domains'n'applications decomposition draft as input in <a href="#domains">the text field below</a>.</p>
-
-    <p>For your convenience, you can also <a href="#domainfile">load a file from your local PC</a> into the text field.</p>
-
-    <p>Make sure to save your results after editing!</p>
-
-    <form id="chart">
-      <h2>Choose diagram style</h2>
-      <label><input type="radio" name="mode" value="cluster" checked> Dendrogram</label>
-      <label><input type="radio" name="mode" value="treemap"> Treemap</label>
-      <label><input type="radio" name="mode" value="partition"> Partition</label>
-    </form>
-    <div id="dnavis"></div>
-    <form id="data">
-      
-      <label for="domains">Enter domains and solutions:
-      </label> 
-      <textarea id="domains" name="domains" rows="20" cols="100"></textarea>
-      <button id="refresh" type="button">Refresh diagram</button>
-      <label for="domainfile">Load local file into text field:
-        <input id="domainfile" name="domainfile" size="20" type="file"></input>
-      </label>
-    </form>
-
-    
-    <script src="d3.v5.15.0.min.js"></script>
     <script>      
       function colorLeaves(root) {
           const color = d3.scaleOrdinal(d3.quantize(d3.interpolateCool, leafCount));
@@ -230,16 +270,16 @@
                 .entries(solutions)[0];
           const root = d3.hierarchy(nesting, d => d.values);
 
-          const mode = d3.select("input[name=mode]:checked")
-                .attr("value");
+          const mode = window.location.hash;
           switch (mode) {
-          case "cluster":
-              renderDendrogram(root);
-              break;
-          case "treemap":
+          case "":
+          case "#treemap":
               renderTreemap(root);
               break;
-          case "partition":
+          case "#dendrogram":
+              renderDendrogram(root);
+              break;
+          case "#partition":
               renderPartition(root);
               break;
           }          
@@ -251,6 +291,49 @@
                   d3.select("#data #domains").node().value = text;
                   renderChart();
               });
+      });
+
+      function hideAllTabs() {
+          d3.selectAll("div.pane")
+              .each(function (d, i) {
+                  d3.select(this)
+                      .style("display", "none");
+              });
+      }
+
+      function deactivateAllTabLinks() {
+          d3.selectAll("div.tabs ul li")
+              .each(function (d, i) {
+                  d3.select(this)
+                      .classed("is-active", false);
+              });
+      }
+
+      function activateTabLink(hash) {
+          d3.select(`div.tabs ul li${hash}-tab`)
+              .classed("is-active", true);
+      }
+
+      function showTab(id) {
+          d3.select(`div${id}`)
+              .style("display", "block");
+      }
+      
+      addEventListener("hashchange", function() {
+          hideAllTabs();
+          deactivateAllTabLinks();
+          
+          const newHash = window.location.hash;
+          activateTabLink(newHash);
+          switch(newHash) {
+          case "#data-editor":
+          case "#help":
+              showTab(newHash);
+              break;
+          default:
+              showTab("#dnavis");
+              renderChart();
+          }
       });
 
       d3.selectAll("#chart input")
