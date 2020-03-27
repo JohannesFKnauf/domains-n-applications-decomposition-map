@@ -30,3 +30,7 @@
 *** Organisation
 **** Branch
 **** Team
+* Positioning hints
+** constraints?
+** penalties?
+** example: rough layering into infrastructural base domains, supporting business domains, customer-facing business domains
