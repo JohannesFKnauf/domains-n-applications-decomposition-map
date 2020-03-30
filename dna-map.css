@@ -1,5 +1,9 @@
 /* page styling */
 
+body {
+    overflow: auto;
+}
+
 label, textarea {
     display: block;
     clear: left;
