@@ -250,17 +250,15 @@
               .text(d => d.data.key);
       }
 
-      function renderChart() {
+      function parseInputData(text) {
           // input is expected in the form country.company.domain.solution
-          var solutions = d3.dsvFormat(".")
-              .parseRows(d3.select("#data #domains")
-                         .node().value, (d, i) => ({
-                             country: d[0],
-                             company: d[1],
-                             domain: d[2],
-                             solution: d[3]
-                         }));
-
+          const solutions = d3.dsvFormat(".")
+                .parseRows(text, (d, i) => ({
+                    country: d[0],
+                    company: d[1],
+                    domain: d[2],
+                    solution: d[3]
+                }));
           const nesting = d3.nest()
                 .key(d => d.country)
                 .key(d => d.company)
@@ -268,6 +266,13 @@
                 .key(d => d.solution)
                 .rollup(d => 1)
                 .entries(solutions)[0];
+          
+          return nesting;
+      }
+      
+      function renderChart() {
+          const nesting = parseInputData(d3.select("#data #domains")
+                                         .node().value);
           const root = d3.hierarchy(nesting, d => d.values);
 
           const mode = window.location.hash;
