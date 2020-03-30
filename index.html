@@ -7,6 +7,7 @@
     <link href="dna-map.css" rel="stylesheet" type="text/css"></link>
     <link href="bulma-0.8.0.min.css" rel="stylesheet" type="text/css"></link>
     <script src="d3.v5.15.0.min.js"></script>
+    <script src="dna-map.js"></script>
   </head>
   <body>
     <section class="section">
@@ -143,7 +144,7 @@
                 .attr("x", 4)
                 .attr("y", 14)
                 .attr("fill-opacity", d => 1.0)
-                .text(d => d.data.key);
+                .text(d => d.data.name);
       }
 
       function renderTreemap(root) {
@@ -195,7 +196,7 @@
                 .attr("x", 4)
                 .attr("y", 14)
                 .attr("fill-opacity", d => 1.0)
-                .text(d => d.data.key);          
+                .text(d => d.data.name);          
       }
 
       function renderDendrogram(root) {
@@ -247,33 +248,57 @@
           node.append("text")
               .attr("dy", 3)
               .attr("x", d => d.children ? -8 : 8)
-              .text(d => d.data.key);
+              .text(d => d.data.name);
       }
 
-      function parseInputData(text) {
-          // input is expected in the form country.company.domain.solution
-          const solutions = d3.dsvFormat(".")
-                .parseRows(text, (d, i) => ({
-                    country: d[0],
-                    company: d[1],
-                    domain: d[2],
-                    solution: d[3]
-                }));
-          const nesting = d3.nest()
-                .key(d => d.country)
-                .key(d => d.company)
-                .key(d => d.domain)
-                .key(d => d.solution)
-                .rollup(d => 1)
-                .entries(solutions)[0];
+      function dotSeparatedRowsToDomains(text) {
+          const rows = text.split(/\r?\n/)
+                .filter(r => r != "");
+          const fullyQualifiedEntries = rows.map(row => row.split("."));
+          return fullyQualifiedEntries;
+      }
+      
+      function domainsToHierarchy(fullyQualifiedEntries) {
+
+          function stripNestingLevel(entries) {
+              return entries.map(entry => entry.slice(1));
+          }
+
+          function nestEntryToHierarchyEntry(entry) {
+              console.assert(Array.isArray(entry.value), "Found non-array entry: %s", entry.value);
+              if (!entry.value.length) {
+                  return {"name": entry.key,
+                          "value": 1};
+              } else {
+                  return {"name": entry.key,
+                          "children": entry.value};
+              }
+          }
           
-          return nesting;
+          function unrollNextNestingLevel(entries) {
+              const nonEmptyEntries = entries.filter(e => e.length > 0);
+              if (nonEmptyEntries.length == 0) {
+                  return [];
+              }
+              
+              return d3.nest()
+                  .key(e => e[0])                                               // read next level as key
+                  .sortKeys(d3.ascending)                                       // sort alphabetically, most helpful for dendrogram and partition
+                  .rollup(es => unrollNextNestingLevel(stripNestingLevel(es)))  // recurse into the next level
+                  .entries(entries)                                             // apply to entries
+                  .map(nestEntryToHierarchyEntry);
+          }
+          
+          const nesting = unrollNextNestingLevel(fullyQualifiedEntries)[0];
+          
+          return d3.hierarchy(nesting);
       }
       
       function renderChart() {
-          const nesting = parseInputData(d3.select("#data #domains")
-                                         .node().value);
-          const root = d3.hierarchy(nesting, d => d.values);
+          const inputData = d3.select("#data #domains")
+                .node().value;
+          const domains = dotSeparatedRowsToDomains(inputData);
+          const root = domainsToHierarchy(domains);
 
           const mode = window.location.hash;
           switch (mode) {
@@ -352,7 +377,7 @@
           const file = input.files[0];
 
           file.text().then(text => {
-              d3.select("#data #domains").node().value =  text;
+              d3.select("#data #domains").node().value = text;
               renderChart();
               this.value = ""; // reset file input
           });
