@@ -64,7 +64,7 @@
                     
                     <p>Welcome to this little prototype of the DnA Decomposition Map App! This app runs completely client-side in your browser. It does not send any of your data to any server.</p>
                     
-                    <p>The example data below is completely fictional. Any similarity to how <a href="https://metamorphant.de">metamorphant</a> works is purely coincidental.</p>
+                    <p>The packaged example data is completely fictional. Any similarity to how <a href="https://metamorphant.de">metamorphant</a> works is purely coincidental.</p>
                     
                     <p>Have fun!</p>
                     
@@ -205,7 +205,7 @@
           const width = 1000;
           const height = 16 * leafCount + 200;
           
-          const cluster = d3.cluster()
+          const cluster = d3.tree()
                 .size([height - 100, width - 200]);
 
           cluster(root);

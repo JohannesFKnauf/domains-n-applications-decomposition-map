@@ -1,9 +1,3 @@
-* Arbitrary nesting of subdomains
-** currently we are limited to a single domain level
-* Arbitrary nesting of subapplications 
-** currently an application is just described by its name
-** subapplication = application feature?
-** precursor for feature analysis?
 * Extended data on elements (domains, applications)
 ** Associated DevOps-Team
 ** Freeform notes
@@ -20,7 +14,11 @@
 ** Breadcrumb Navigation
 ** Drag-and-Drop Editing
 * Improved layout
-** Slice on high level, dice on subdomains
+** Slice on high level, dice on subdomains?
+** Quantum Treemap?
+** Stretched Treemap?
+*** Calculate square treemap for reduced width, stretch x coordinates afterwards
+*** First experiment is promising, but yields problems with padding
 * Strict model
 ** counter-productive? maybe the ambiguity is really helpful?
 ** Elements
