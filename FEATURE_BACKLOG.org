@@ -38,3 +38,9 @@
 ** Mail update notifications to others
 * Search based highlight
 ** a.k.a. Search on Map
+* Edit history
+** local to the browser
+** enables new features:
+*** undo
+*** recover
+*** flip between versions
