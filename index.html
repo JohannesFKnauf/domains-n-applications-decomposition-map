@@ -198,7 +198,10 @@
                 .attr("width", d => d.x1 - d.x0 - 6)
                 .attr("height", d => d.y1 - d.y0 - 6)
                 .attr("fill-opacity", d => 1.0)
-                .text(d => d.data.name);          
+                .append("xhtml:div")
+                .attr("title", d => d.data.name)
+                .style("color", "black")
+                .text(d => d.data.name);
       }
 
       function renderDendrogram(root) {
